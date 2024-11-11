@@ -35,15 +35,13 @@ public class EmployeeManagementGUI extends JFrame {
         // Main Buttons
         JPanel buttonPanel = new JPanel();
         JButton addButton = new JButton("Add Employee");
-        JButton displayButton = new JButton("Display Employees");
         JButton updateButton = new JButton("Update Employee");
         buttonPanel.add(addButton);
-        buttonPanel.add(displayButton);
         buttonPanel.add(updateButton);
         add(buttonPanel, BorderLayout.NORTH);
 
         // Table for displaying employee data
-        String[] columnNames = { "ID", "Name", "Job Title", "Salary", "Performance", "Attendance", "Additional Info" };
+        String[] columnNames = { "ID", "Name", "Job Title", "Salary", "Performance", "Attendance" };
         tableModel = new DefaultTableModel(columnNames, 0);
         JTable table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
@@ -51,7 +49,6 @@ public class EmployeeManagementGUI extends JFrame {
 
         // Action Listeners for buttons
         addButton.addActionListener(e -> openAddEmployeeDialog());
-        displayButton.addActionListener(e -> displayEmployees());
         updateButton.addActionListener(e -> openUpdateEmployeeDialog());
     }
 
@@ -96,7 +93,10 @@ public class EmployeeManagementGUI extends JFrame {
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> {
             String name = nameField.getText();
-            double salary = Double.parseDouble(salaryField.getText());
+            String s = salaryField.getText();
+            s=s.replace(",","");
+            double salary =Integer.parseInt(s);
+          //  double salary = Double.parseDouble(salaryField.getText());
             String jobTitle = jobTitleField.getText();
             int id = Integer.parseInt(idField.getText());
             String type = (String) typeCombo.getSelectedItem();
@@ -109,17 +109,9 @@ public class EmployeeManagementGUI extends JFrame {
                 interns.add(new Intern(name, salary, jobTitle, id, additionalField.getText()));
             }
             dialog.dispose();
-        });
-
-        dialog.add(new JLabel()); // empty cell for layout
-        dialog.add(saveButton);
-        dialog.setVisible(true);
-    }
-
-    private void displayEmployees() {
-        tableModel.setRowCount(0); // Clear the table
-        for (Employee e : employees) {
-            tableModel.addRow(e.toObjectArray());
+            tableModel.setRowCount(0); // Clear the table
+        for (Employee em : employees) {
+            tableModel.addRow(em.toObjectArray());
         }
         for (Manager m : managers) {
             tableModel.addRow(m.toObjectArray());
@@ -127,6 +119,11 @@ public class EmployeeManagementGUI extends JFrame {
         for (Intern i : interns) {
             tableModel.addRow(i.toObjectArray());
         }
+        });
+
+        dialog.add(new JLabel()); // empty cell for layout
+        dialog.add(saveButton);
+        dialog.setVisible(true);
     }
 
     private void openUpdateEmployeeDialog() {
@@ -163,6 +160,16 @@ public class EmployeeManagementGUI extends JFrame {
                 }
             }
             dialog.dispose();
+            tableModel.setRowCount(0); // Clear the table
+        for (Employee em : employees) {
+            tableModel.addRow(em.toObjectArray());
+        }
+        for (Manager m : managers) {
+            tableModel.addRow(m.toObjectArray());
+        }
+        for (Intern i : interns) {
+            tableModel.addRow(i.toObjectArray());
+        }
         });
 
         dialog.add(new JLabel()); // empty cell for layout
