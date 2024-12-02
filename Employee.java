@@ -14,7 +14,9 @@ class Employee {
             this.attendance = 0;
             this.performance = 0;
         }
-    
+        public int getId() {
+            return employeeID;
+        }
         public String getName() {
             return name;
         }

@@ -2,17 +2,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.util.LinkedList;
 import java.util.List;
-
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 public class EmployeeManagementGUI extends JFrame {
@@ -41,7 +31,7 @@ public class EmployeeManagementGUI extends JFrame {
         add(buttonPanel, BorderLayout.NORTH);
 
         // Table for displaying employee data
-        String[] columnNames = { "ID", "Name", "Job Title", "Salary", "Performance", "Attendance" };
+        String[] columnNames = {"ID", "Name", "Job Title", "Salary", "Performance", "Attendance"};
         tableModel = new DefaultTableModel(columnNames, 0);
         JTable table = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(table);
@@ -61,7 +51,7 @@ public class EmployeeManagementGUI extends JFrame {
         JTextField salaryField = new JTextField();
         JTextField jobTitleField = new JTextField();
         JTextField idField = new JTextField();
-        JComboBox<String> typeCombo = new JComboBox<>(new String[] { "Employee", "Manager", "Intern" });
+        JComboBox<String> typeCombo = new JComboBox<>(new String[]{"Employee", "Manager", "Intern"});
         JTextField additionalField = new JTextField();
         JLabel additionalLabel = new JLabel("Department/School");
 
@@ -92,42 +82,47 @@ public class EmployeeManagementGUI extends JFrame {
 
         JButton saveButton = new JButton("Save");
         saveButton.addActionListener(e -> {
-            String name = nameField.getText();
-            String s = salaryField.getText();
-            s=s.replace(",","");
-            double salary =Integer.parseInt(s);
-          //  double salary = Double.parseDouble(salaryField.getText());
-            String jobTitle = jobTitleField.getText();
-            int id = Integer.parseInt(idField.getText());
-            String type = (String) typeCombo.getSelectedItem();
+            try {
+                String name = nameField.getText();
+                String s = salaryField.getText().replace(",", "");
+                double salary = Double.parseDouble(s);
+                String jobTitle = jobTitleField.getText();
+                int id = Integer.parseInt(idField.getText());
+                String type = (String) typeCombo.getSelectedItem();
 
-            if (type.equals("Employee")) {
-                employees.add(new Employee(name, salary, jobTitle, id));
-            } else if (type.equals("Manager")) {
-                managers.add(new Manager(name, salary, jobTitle, id, additionalField.getText()));
-            } else if (type.equals("Intern")) {
-                interns.add(new Intern(name, salary, jobTitle, id, additionalField.getText()));
+                // Check for unique ID
+                boolean idExists = employees.stream().anyMatch(emp -> emp.getId() == id) ||
+                                   managers.stream().anyMatch(mgr -> mgr.getId() == id) ||
+                                   interns.stream().anyMatch(intn -> intn.getId() == id);
+
+                if (idExists) {
+                    JOptionPane.showMessageDialog(dialog, "ID already exists! Please use a unique ID.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Add employee based on type
+                if (type.equals("Employee")) {
+                    employees.add(new Employee(name, salary, jobTitle, id));
+                } else if (type.equals("Manager")) {
+                    managers.add(new Manager(name, salary, jobTitle, id, additionalField.getText()));
+                } else if (type.equals("Intern")) {
+                    interns.add(new Intern(name, salary, jobTitle, id, additionalField.getText()));
+                }
+
+                // Update table and close dialog
+                dialog.dispose();
+                updateTable();
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "Invalid input! Please check your entries.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-            dialog.dispose();
-            tableModel.setRowCount(0); // Clear the table
-        for (Employee em : employees) {
-            tableModel.addRow(em.toObjectArray());
-        }
-        for (Manager m : managers) {
-            tableModel.addRow(m.toObjectArray());
-        }
-        for (Intern i : interns) {
-            tableModel.addRow(i.toObjectArray());
-        }
         });
 
-        dialog.add(new JLabel()); // empty cell for layout
+        dialog.add(new JLabel()); // Empty cell for layout
         dialog.add(saveButton);
         dialog.setVisible(true);
     }
 
     private void openUpdateEmployeeDialog() {
-        // Dialog to handle updating employee details
         JDialog dialog = new JDialog(this, "Update Employee", true);
         dialog.setSize(400, 300);
         dialog.setLayout(new GridLayout(5, 2));
@@ -159,8 +154,33 @@ public class EmployeeManagementGUI extends JFrame {
                     e1.updateBonus(bonus);
                 }
             }
+            for (Manager e1 : managers) {
+                if (e1.getName().equalsIgnoreCase(name)) {
+                    e1.setPerformance(performance);
+                    e1.setAttendance(attendance);
+                    e1.updateBonus(bonus);
+                }
+            }
+            for (Intern e1 : interns) {
+                if (e1.getName().equalsIgnoreCase(name)) {
+                    e1.setPerformance(performance);
+                    e1.setAttendance(attendance);
+                    e1.updateBonus(bonus);
+                }
+            }
+
             dialog.dispose();
-            tableModel.setRowCount(0); // Clear the table
+            updateTable();
+        });
+
+        dialog.add(new JLabel()); // Empty cell for layout
+        dialog.add(updateButton);
+        dialog.setVisible(true);
+    }
+
+    // Helper method to refresh table
+    private void updateTable() {
+        tableModel.setRowCount(0); // Clear the table
         for (Employee em : employees) {
             tableModel.addRow(em.toObjectArray());
         }
@@ -170,11 +190,6 @@ public class EmployeeManagementGUI extends JFrame {
         for (Intern i : interns) {
             tableModel.addRow(i.toObjectArray());
         }
-        });
-
-        dialog.add(new JLabel()); // empty cell for layout
-        dialog.add(updateButton);
-        dialog.setVisible(true);
     }
 
     public static void main(String[] args) {
